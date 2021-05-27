@@ -7,7 +7,7 @@ variables:
 - name: poolVmImage
   value: 'ubuntu-latest'
 - name: storageAccountName
-  value: 'armtpls'
+  value: 'storagedd'
 - name: storagecontainer
   value: 'arm'
 - name: storageloc
@@ -21,7 +21,7 @@ stages:
 - stage: UploadARMTemplates
   displayName: Upload ARM templates
   variables:
-    rgName: 'apim'
+    rgName: 'apimdd'
     sourceAPIMName: 'base-apim'
     destinationAPIMName: 'apimBasedevAPIM'
   jobs:
@@ -57,9 +57,10 @@ stages:
   displayName: Deploy Dev
   dependsOn: UploadARMTemplates
   variables:
-    rgName: 'apim'
+    rgName: 'apimdd'
     sourceAPIMName: 'base-apim'
-    destinationAPIMName: 'apimBasedevAPIM'
+    destinationAPIMName: 'apimBaseddddevAPIM'
+    ratelimit: '5'
   jobs:
     - deployment: 'DeployDevAPIM'
       displayName: 'Deploy to Dev APIM'
@@ -77,6 +78,20 @@ stages:
                 buildType: 'current'
                 artifactName: 'zip'
                 targetPath: '$(Pipeline.Workspace)/temp'
+            
+            - task: replacetokens@3
+              inputs:
+                rootDirectory: '$(Pipeline.Workspace)/temp'
+                targetFiles: '**/*-parameters.json'
+                encoding: 'auto'
+                writeBOM: true
+                actionOnMissing: 'warn'
+                keepToken: false
+                tokenPrefix: '#{'
+                tokenSuffix: '}#'
+                useLegacyPattern: false
+                enableTransforms: false
+                enableTelemetry: true
 
             # Deploy to Dev Instance
             - task: AzureCLI@2
@@ -106,9 +121,10 @@ stages:
   displayName: Deploy Prod
   dependsOn: DeployToDev
   variables:
-    rgName: 'apim'
+    rgName: 'apimdd'
     sourceAPIMName: 'base-apim'
-    destinationAPIMName: 'apimBasedevAPIM'
+    destinationAPIMName: 'apimBasedddprodAPIM'
+    ratelimit: '25'
   jobs:
     - deployment: 'DeployProdAPIM'
       displayName: 'Deploy to Prod APIM'
@@ -126,6 +142,20 @@ stages:
                 buildType: 'current'
                 artifactName: 'zip'
                 targetPath: '$(Pipeline.Workspace)/temp'
+            
+            - task: replacetokens@3
+              inputs:
+                rootDirectory: '$(Pipeline.Workspace)/temp'
+                targetFiles: '**/*-parameters.json'
+                encoding: 'auto'
+                writeBOM: true
+                actionOnMissing: 'warn'
+                keepToken: false
+                tokenPrefix: '#{'
+                tokenSuffix: '}#'
+                useLegacyPattern: false
+                enableTransforms: false
+                enableTelemetry: true
 
             # Deploy to Prod Instance
             - task: AzureCLI@2
