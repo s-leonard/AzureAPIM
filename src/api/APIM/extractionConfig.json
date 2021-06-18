@@ -2,7 +2,7 @@
     "baseFileName": "base-apim",
     "sourceApimName": "",
     "destinationApimName": "",
-    "resourceGroup": "mondaydemo",
+    "resourceGroup": "",
     "fileFolder": "./OverrideThisValue",
     "linkedTemplatesBaseUrl": "{{location}}{{query}}",
     "LinkedTemplatesUrlQueryString": "{{query}}",
